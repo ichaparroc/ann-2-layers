@@ -64,7 +64,7 @@ int main(int argc,char **argv)
 		//entrenamiento
 		if(strtol(argv[1],NULL,10)==0)
 		{
-			//entrenamiento
+			//parametros
 			n_entradas=strtol(argv[2],NULL,10);
 			n_oculta1=strtol(argv[3],NULL,10);
 			n_oculta2=strtol(argv[4],NULL,10);
@@ -84,65 +84,55 @@ int main(int argc,char **argv)
 					txt_dataset>>salida[n_instancias][i];
 			}
 			txt_dataset.close();
-cout<<"flag";
 
 			//pesos
-			for(int neurona=0;neurona<n_oculta1;neurona++) //capa oculta 1
+			for(int neurona=0;neurona<n_oculta1;neurona++)
 			{
 	  			b[0][neurona]=(double)rand()/RAND_MAX;
-	  			if(FLAG_DBG==1) cout<<endl<<"b[0]["<<neurona<<"]="<<b[0][neurona];
 		  		for(int neurona_atras=0;neurona_atras<n_entradas;neurona_atras++)
-		  		{
   					w[0][neurona_atras][neurona]=(double)rand()/RAND_MAX;
-					if(FLAG_DBG==1) cout<<endl<<"w[0]["<<neurona_atras<<"]["<<neurona<<"]="<<w[0][neurona_atras][neurona];
-				}
 			}
-			for(int neurona=0;neurona<n_oculta2;neurona++) //capa oculta 2
+			for(int neurona=0;neurona<n_oculta2;neurona++)
 			{
 				b[1][neurona]=(double)rand()/RAND_MAX;
-	  			if(FLAG_DBG==1) cout<<endl<<"b[1]["<<neurona<<"]="<<b[1][neurona];
 	  			for(int neurona_atras=0;neurona_atras<n_oculta1;neurona_atras++)
-		  		{
 		  			w[1][neurona_atras][neurona]=(double)rand()/RAND_MAX;
-  					if(FLAG_DBG==1) cout<<endl<<"w[1]["<<neurona_atras<<"]["<<neurona<<"]="<<w[1][neurona_atras][neurona];
-  				}
   			}
-			for(int neurona=0;neurona<n_salidas;neurona++) //capa salida
+			for(int neurona=0;neurona<n_salidas;neurona++)
 			{
 				b[2][neurona]=(double)rand()/RAND_MAX;
-				if(FLAG_DBG==1) cout<<endl<<"b[2]["<<neurona<<"]="<<b[2][neurona];
 				for(int neurona_atras=0;neurona_atras<n_oculta2;neurona_atras++)
-				{
 					w[2][neurona_atras][neurona]=(double)rand()/RAND_MAX;
-					if(FLAG_DBG==1) cout<<endl<<"w[2]["<<neurona_atras<<"]["<<neurona<<"]="<<w[2][neurona_atras][neurona];
-				}
 			}
 		}
-
 
 		//prediccion-clasificacion
 		if(strtol(argv[1],NULL,10)==1)
 		{
-			//parametros+pesos
-			ifstream txt_nn(argv[1]);
+			cout<<"entro";
+			//parametros
+			ifstream txt_nn(argv[2]);
 			txt_nn>>n_entradas;
 			txt_nn>>n_oculta1;
 			txt_nn>>n_oculta2;
 			txt_nn>>n_salidas;
 			n_epocas=1;
-			for(int neurona=0;neurona<n_oculta1;neurona++) //capa oculta 1
+			fact_aprendizaje=0;
+
+			//pesos
+			for(int neurona=0;neurona<n_oculta1;neurona++)
 			{
 	  			txt_nn>>b[0][neurona];
 		  		for(int neurona_atras=0;neurona_atras<n_entradas;neurona_atras++)
   					txt_nn>>w[0][neurona_atras][neurona];
 			}
-			for(int neurona=0;neurona<n_oculta2;neurona++) //capa oculta 2
+			for(int neurona=0;neurona<n_oculta2;neurona++)
 			{
 				txt_nn>>b[1][neurona];
 	  			for(int neurona_atras=0;neurona_atras<n_oculta1;neurona_atras++)
 		  			txt_nn>>w[1][neurona_atras][neurona];
   			}
-			for(int neurona=0;neurona<n_salidas;neurona++) //capa salida
+			for(int neurona=0;neurona<n_salidas;neurona++)
 			{
 				txt_nn>>b[2][neurona];
 				for(int neurona_atras=0;neurona_atras<n_oculta2;neurona_atras++)
@@ -151,7 +141,7 @@ cout<<"flag";
 			txt_nn.close();
 
 			//dataset
-			ifstream txt_dataset(argv[2]);
+			ifstream txt_dataset(argv[3]);
 			n_instancias=-1;
 			while(!txt_dataset.eof())
 			{
@@ -208,7 +198,6 @@ cout<<"flag";
 		for(int epoca=0;epoca<n_epocas;epoca++)
 		{
 			if(FLAG_DBG==1) cout<<endl<<endl<<"Epoca "<<epoca;
-
 	  		error_epoca=0.0;
 
 			//instancias
@@ -221,8 +210,6 @@ cout<<"flag";
 					for(int neurona_atras=0;neurona_atras<n_entradas;neurona_atras++)
 	        			z+=w[0][neurona_atras][neurona]*entrada[instancia][neurona_atras];
 					a[0][neurona]=sigmoide(z);
-					if(FLAG_DBG==1) cout<<endl<<"z[0]["<<neurona<<"]="<<z;
-	      			if(FLAG_DBG==1) cout<<endl<<"a[0]["<<neurona<<"]="<<a[0][neurona]<<endl;
 	    		}
 	    		for(int neurona=0;neurona<n_oculta2;neurona++)
 	    		{
@@ -230,17 +217,13 @@ cout<<"flag";
 	      			for(int neurona_atras=0;neurona_atras<n_oculta1;neurona_atras++)
 	        			z+=w[1][neurona_atras][neurona]*a[0][neurona_atras];
 	      			a[1][neurona]=sigmoide(z);
-					if(FLAG_DBG==1) cout<<endl<<"z[1]["<<neurona<<"]="<<z;
-	      			if(FLAG_DBG==1) cout<<endl<<"a[1]["<<neurona<<"]="<<a[1][neurona]<<endl;
 	   			}
 	    		for(int neurona=0;neurona<n_salidas;neurona++)
 	    		{
-	      		z=b[2][neurona];
+		      		z=b[2][neurona];
 					for(int neurona_atras=0;neurona_atras<n_oculta2;neurona_atras++)
 	        			z+=w[2][neurona_atras][neurona]*a[1][neurona_atras];
 					a[2][neurona]=sigmoide(z);
-					if(FLAG_DBG==1) cout<<endl<<"z[2]["<<neurona<<"]="<<z;
-					if(FLAG_DBG==1) cout<<endl<<"a[2]["<<neurona<<"]="<<a[2][neurona]<<endl;
 	    		}
 
 				//prediccion-clasificacion
@@ -268,17 +251,13 @@ cout<<"flag";
 
 	    			//propagacion hacia atras
 	    			for(int neurona=0;neurona<n_salidas;neurona++)
-		    		{
 		    			d_b[2][neurona]=d_error(salida[instancia][neurona],a[2][neurona])*d_sigmoide(a[2][neurona]);
-						if(FLAG_DBG==1) cout<<endl<<"d_b[2]["<<neurona<<"]="<<d_b[2][neurona];
-	    			}
 	    			for(int neurona=0;neurona<n_oculta2;neurona++)
 	    			{
 	    				z=0.0;
 		      			for(int neurona_adelante=0;neurona_adelante<n_salidas;neurona_adelante++)
 							z+=w[2][neurona][neurona_adelante]*d_b[2][neurona_adelante];
-   		     			d_b[1][neurona]=z*d_sigmoide(a[1][neurona]);
-	    				if(FLAG_DBG==1) cout<<endl<<"d_b[1]["<<neurona<<"]="<<d_b[1][neurona];
+ 		     			d_b[1][neurona]=z*d_sigmoide(a[1][neurona]);
 		    		}
 				    for(int neurona=0;neurona<n_oculta1;neurona++)
 			    	{
@@ -286,7 +265,6 @@ cout<<"flag";
 		    	  		for(int neurona_adelante=0;neurona_adelante<n_oculta2;neurona_adelante++)
 		        			z+=w[1][neurona][neurona_adelante]*d_b[1][neurona_adelante];
    	     				d_b[0][neurona]=z*d_sigmoide(a[0][neurona]);
-   	    	 			if(FLAG_DBG==1) cout<<endl<<"d_b[0]["<<neurona<<"]="<<d_b[0][neurona];
 		    		}
 
 				    //nuevos pesos y bias
@@ -294,39 +272,77 @@ cout<<"flag";
 					{
 						b[2][neurona_adelante]-=fact_aprendizaje*d_b[2][neurona_adelante];
 						for(int neurona=0;neurona<n_oculta2;neurona++)
-		        		{
-   			       			w[2][neurona][neurona_adelante]-=fact_aprendizaje*d_b[2][neurona_adelante]*a[1][neurona];
-	        	  			if(FLAG_DBG==1) cout<<endl<<"w[2]["<<neurona<<"]["<<neurona_adelante<<"]="<<w[2][neurona][neurona_adelante];
-    	      				if(FLAG_DBG==1) cout<<endl<<"b[2]["<<neurona_adelante<<"]="<<b[2][neurona_adelante];
-        				}
+ 			       			w[2][neurona][neurona_adelante]-=fact_aprendizaje*d_b[2][neurona_adelante]*a[1][neurona];
 					}
 		   	    	for(int neurona_adelante=0;neurona_adelante<n_oculta2;neurona_adelante++)
 					{
-    			    	b[1][neurona_adelante]-=fact_aprendizaje*d_b[1][neurona_adelante];
+	 			    	b[1][neurona_adelante]-=fact_aprendizaje*d_b[1][neurona_adelante];
     	    			for(int neurona=0;neurona<n_oculta1;neurona++)
-        				{
-          					w[1][neurona][neurona_adelante]-=fact_aprendizaje*d_b[1][neurona_adelante]*a[0][neurona];
-          					if(FLAG_DBG==1) cout<<endl<<"w[1]["<<neurona<<"]["<<neurona_adelante<<"]="<<w[1][neurona][neurona_adelante];
-          					if(FLAG_DBG==1) cout<<endl<<"b[1]["<<neurona_adelante<<"]="<<b[1][neurona_adelante];
-        				}
+        					w[1][neurona][neurona_adelante]-=fact_aprendizaje*d_b[1][neurona_adelante]*a[0][neurona];
 					}
 					for(int neurona_adelante=0;neurona_adelante<n_oculta1;neurona_adelante++)
 					{
 						b[0][neurona_adelante]-=fact_aprendizaje*d_b[0][neurona_adelante];
-    	    			for(int neurona=0;neurona<n_entradas;neurona++)
-        				{
+	   	    			for(int neurona=0;neurona<n_entradas;neurona++)
 	          				w[0][neurona][neurona_adelante]-=fact_aprendizaje*d_b[0][neurona_adelante]*entrada[instancia][neurona];
-    	      				if(FLAG_DBG==1) cout<<endl<<"w[0]["<<neurona<<"]["<<neurona_adelante<<"]="<<w[0][neurona][neurona_adelante];
-        	  				if(FLAG_DBG==1) cout<<endl<<"b[0]["<<neurona_adelante<<"]="<<b[0][neurona_adelante];
-        				}
         			}
+				}
+
+				//debug
+				if(FLAG_DBG==1)
+				{
+					for(int neurona=0;neurona<n_oculta1;neurona++)
+	    			{
+						if(FLAG_DBG==1) cout<<endl<<"z[0]["<<neurona<<"]="<<z;
+		      			if(FLAG_DBG==1) cout<<endl<<"a[0]["<<neurona<<"]="<<a[0][neurona]<<endl;
+	    			}
+	    			for(int neurona=0;neurona<n_oculta2;neurona++)
+	    			{
+						if(FLAG_DBG==1) cout<<endl<<"z[1]["<<neurona<<"]="<<z;
+		      			if(FLAG_DBG==1) cout<<endl<<"a[1]["<<neurona<<"]="<<a[1][neurona]<<endl;
+	   				}
+	    			for(int neurona=0;neurona<n_salidas;neurona++)
+	    			{
+						if(FLAG_DBG==1) cout<<endl<<"z[2]["<<neurona<<"]="<<z;
+						if(FLAG_DBG==1) cout<<endl<<"a[2]["<<neurona<<"]="<<a[2][neurona]<<endl;
+	    			}
+
+					//entrenamiento
+		    		if(strtol(argv[1],NULL,10)==0)
+		    		{
+						//calculo del ERROR
+						for(int neurona=0;neurona<n_salidas;neurona++)
+							cout<<endl<<"error salida "<<neurona<<"="<<error(salida[instancia][neurona],a[2][neurona]);
+						//propagacion hacia atras
+						for(int neurona=0;neurona<n_salidas;neurona++)
+							cout<<endl<<"d_b[2]["<<neurona<<"]="<<d_b[2][neurona];
+						for(int neurona=0;neurona<n_oculta2;neurona++)
+							cout<<endl<<"d_b[1]["<<neurona<<"]="<<d_b[1][neurona];
+						for(int neurona=0;neurona<n_oculta1;neurona++)
+	   	    	 			cout<<endl<<"d_b[0]["<<neurona<<"]="<<d_b[0][neurona];
+						//nuevos pesos y bias
+						for(int neurona_adelante=0;neurona_adelante<n_salidas;neurona_adelante++)
+		      				cout<<endl<<"b[2]["<<neurona_adelante<<"]="<<b[2][neurona_adelante];
+			   	    	for(int neurona_adelante=0;neurona_adelante<n_oculta2;neurona_adelante++)
+						{
+	      					cout<<endl<<"b[1]["<<neurona_adelante<<"]="<<b[1][neurona_adelante];
+					    	for(int neurona=0;neurona<n_oculta1;neurona++)
+		      					cout<<endl<<"w[1]["<<neurona<<"]["<<neurona_adelante<<"]="<<w[1][neurona][neurona_adelante];
+						}
+						for(int neurona_adelante=0;neurona_adelante<n_oculta1;neurona_adelante++)
+						{
+	    	  				cout<<endl<<"b[0]["<<neurona_adelante<<"]="<<b[0][neurona_adelante];
+			    			for(int neurona=0;neurona<n_entradas;neurona++)
+			      				cout<<endl<<"w[0]["<<neurona<<"]["<<neurona_adelante<<"]="<<w[0][neurona][neurona_adelante];
+						}
+					}
 				}
 			}
 
 			//entrenamiento
 			if(strtol(argv[1],NULL,10)==0)
 			{
-				//guardar errores				
+				//guardar errores
 				sprintf(buffer,"%s.error",argv[8]);
 				if(FLAG_DBG==1) cout<<endl<<"archivo para error: "<<buffer;
 				ofstream txt_error(buffer,ofstream::app);
@@ -342,7 +358,7 @@ cout<<"flag";
 			//guardar red neuronal entrenada
 			sprintf(buffer,"%s.nn",argv[8]);
 			ofstream txt_nn(buffer);
-			for(int parametro=1;parametro<6;parametro++)
+			for(int parametro=2;parametro<6;parametro++)
 				txt_nn<<argv[parametro]<<" ";
 			for(int neurona=0;neurona<n_oculta1;neurona++) //capa oculta 1
 			{
