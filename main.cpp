@@ -13,7 +13,7 @@
 #define max_entradas 20
 #define max_salidas 8
 #define max_instancias 1000
-#define FLAG_DBG 1
+#define FLAG_DBG 0
 
 using namespace std;
 
@@ -46,7 +46,7 @@ int main(int argc,char **argv)
 		cout<<endl<<"|Perceptron de 2 capas ocultas By: Silvana Cabana|";
 		cout<<endl<<"|________________________________________________|";
 		cout<<endl<<endl<<"  Para modo entrenamiento usar : "<<endl;
-		cout<<"\t"<<argv[0]<<" [0=entrenamiento] [entradas] [ocultas1] [ocultas2] [salidas] [epocas] [aprendizaje] [archivo-dataset]";
+		cout<<"\t"<<argv[0]<<" [0=entrenamiento] [entradas] [ocultas1] [ocultas2] [salidas] [error-minimo] [aprendizaje] [archivo-dataset]";
 		cout<<endl<<"*Se generara un archivo de salida conteniendo topologia+pesos como [archivo-dataset].tp";
 		cout<<endl<<endl<<"  Para modo prediccion-clasificacion usar : "<<endl;
 		cout<<"\t"<<argv[0]<<" [1=prediccion-clasificacion] [archivo-red-neuronal] [archivo-data-set]";
@@ -55,10 +55,10 @@ int main(int argc,char **argv)
 	}
 	else
 	{
-		int n_entradas,n_oculta1,n_oculta2,n_salidas,n_instancias,n_epocas;
+		int n_entradas,n_oculta1,n_oculta2,n_salidas,n_instancias;
 		double a[3][max_neuronas],w[3][max_neuronas][max_neuronas],b[3][max_neuronas],d_b[3][max_neuronas];
 		double entrada[max_instancias][max_entradas],salida[max_instancias][max_salidas];
-		double fact_aprendizaje,error_epoca,z;
+		double fact_aprendizaje,error_epoca,z,error_minimo;
 		char buffer[50];
 
 		//entrenamiento
@@ -69,7 +69,7 @@ int main(int argc,char **argv)
 			n_oculta1=strtol(argv[3],NULL,10);
 			n_oculta2=strtol(argv[4],NULL,10);
 			n_salidas=strtol(argv[5],NULL,10);
-			n_epocas=strtol(argv[6],NULL,10);
+			error_minimo=strtod(argv[6],NULL);
 			fact_aprendizaje=strtod(argv[7],NULL);
 
 			//dataset
@@ -116,7 +116,6 @@ int main(int argc,char **argv)
 			txt_nn>>n_oculta1;
 			txt_nn>>n_oculta2;
 			txt_nn>>n_salidas;
-			n_epocas=1;
 			fact_aprendizaje=0;
 
 			//pesos
@@ -159,7 +158,7 @@ int main(int argc,char **argv)
   			cout<<endl<<"n_oculta1 :"<<n_oculta1;
   			cout<<endl<<"n_oculta2 :"<<n_oculta2;
   			cout<<endl<<"n_salidas :"<<n_salidas;
-  			cout<<endl<<"n_epocas :"<<n_epocas;
+  			cout<<endl<<"error_minimo :"<<error_minimo;
   			cout<<endl<<"fact_apren: "<<fact_aprendizaje;
   			cout<<endl<<endl<<"Matriz de entradas";
   			for(int instancia=0;instancia<n_instancias;instancia++)
@@ -194,8 +193,9 @@ int main(int argc,char **argv)
 			}
 		}
 
+		error_epoca=1.0;
 		//epocas
-		for(int epoca=0;epoca<n_epocas;epoca++)
+		for(int epoca=0;error_epoca>error_minimo;epoca++)
 		{
 			if(FLAG_DBG==1) cout<<endl<<endl<<"Epoca "<<epoca;
 	  		error_epoca=0.0;
@@ -230,7 +230,7 @@ int main(int argc,char **argv)
 				if(strtol(argv[1],NULL,10)==1)
 		    	{
 					//guardar predicciones-clasficaciones
-					sprintf(buffer,"%s.out",argv[2]);
+					sprintf(buffer,"%s_%d_%d.out",argv[3],n_oculta1,n_oculta2);
 					if(FLAG_DBG==1) cout<<endl<<"archivo para resultados: "<<buffer;
 					ofstream txt_out(buffer,ofstream::app);
 					for(int neurona=0;neurona<n_salidas;neurona++)
@@ -343,20 +343,21 @@ int main(int argc,char **argv)
 			if(strtol(argv[1],NULL,10)==0)
 			{
 				//guardar errores
-				sprintf(buffer,"%s.error",argv[8]);
+				sprintf(buffer,"%s_%s_%s.error",argv[8],argv[3],argv[4]);
 				if(FLAG_DBG==1) cout<<endl<<"archivo para error: "<<buffer;
 				ofstream txt_error(buffer,ofstream::app);
 				txt_error<<error_epoca<<endl;
 				if(FLAG_DBG==1)	cout<<endl<<epoca<<" : "<<error_epoca;
 				txt_error.close();
 			}
+
 		}
 
 		//entrenamiento
 		if(strtol(argv[1],NULL,10)==0)
 		{
 			//guardar red neuronal entrenada
-			sprintf(buffer,"%s.nn",argv[8]);
+			sprintf(buffer,"%s_%s_%s.nn",argv[8],argv[3],argv[4]);
 			ofstream txt_nn(buffer);
 			for(int parametro=2;parametro<6;parametro++)
 				txt_nn<<argv[parametro]<<" ";
@@ -396,8 +397,8 @@ int main(int argc,char **argv)
 		//entrenamiento
 		if(strtol(argv[1],NULL,10)==0)
 		{
-			//analisis de sensibilidad			
-			sprintf(buffer,"%s.as",argv[8]);
+			//analisis de sensibilidad
+			sprintf(buffer,"%s_%s_%s.as",argv[8],argv[3],argv[4]);
 			ofstream txt_as(buffer);
 			double aux1;
 			double aux2;
